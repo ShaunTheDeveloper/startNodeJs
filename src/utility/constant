@@ -1,0 +1,10 @@
+export const users = [
+    {userName:"mohammad01",password:"123456",products:["phone","milk"]},
+    {userName:"ali13",password:"123456",products:["dull","laptop"]},
+    {userName:"javad34",password:"123456",products:["cable","mouse"]},
+    {userName:"lamine",password:"123456",products:[]},
+    {userName:"abbas",password:"123456",products:[]},
+    {userName:"hossein",password:"123456",products:[]},
+    {userName:"amirHossein",password:"123456",products:[]},
+    {userName:"navid",password:"123456",products:[]},
+]
