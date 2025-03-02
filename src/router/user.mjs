@@ -9,6 +9,43 @@ userRouter.use(express.json())
 
 
 
+const parsingId = (req,res,next)=>{
+    
+    const id = req.params.id;
+    console.log(id);
+    if(id){
+        req.id = parseInt(req.params.id);
+        if(isNaN(req.params.id))
+            return res.json({message:"invalid id input"})
+    }
+    
+    next();
+}
+
+const validateExistingUserId = (req,res,next)=>{
+
+    if(req.method === "POST"){
+        return next();
+    }
+    
+    const id = parseInt(req.params.id);
+    const result = checkingId(id)
+    if(result){
+        req.user = result;
+        next()
+    }else{
+        return res.json("user with this id not founded")
+    }
+}
+
+
+
+
+userRouter.use("/users/:id",parsingId);
+userRouter.use("/users/:id",validateExistingUserId);
+
+
+
 
 
 
@@ -24,70 +61,50 @@ userRouter.get("/users",(req,res)=>{
 
 
 userRouter.get("/users/:id",(req,res)=>{
-    const {id} = req.params;
-
-    const user = checkingId(id)
-
-    if(user)
-        return res.json(user)
-    else
-        return res.json({message:"not exist"})
-
+    const {user} = req;
+    return res.json(user)
 })
 
 userRouter.get("/users/:id/products",(req,res)=>{
-    const id = parseInt(req.params.id);
-
-    const user = checkingId(id);
-    const index = findIndex(user);
-
-    return res.json(users[index].products);
+    const {user} = req
+    return res.json(user.products);
 })
 
+userRouter.post("/users/:id/update",(req,res)=>{
+    const {userName,password,products} = req.body
+    const {id} = req
 
-userRouter.post("/users",(req,res)=>{
-    const {id,userName,password,products} = req.body
-
-    const user = checkingId(id);
-
-    if(user){
-        return res.json({message:"user with this id exist"})
-    }else{
-        const newUser = {id,userName,password,products}
-        users.push(newUser);
-        return res.json({message:"successful"})
-    }
+    
+    const newUser = {id,userName,password,products}
+    users.push(newUser);
+    return res.json(newUser)
+    
 })
 
 
 userRouter.patch("/users/:id",(req,res)=>{
-    const id = parseInt(req.params.id)
+    const {id,user} = req;
     const {userName,password,products} = req.body
-    const user = checkingId(id);
 
-    if(user){
-        const index = users.indexOf(user);
-        const updated = {id,userName:userName||users.userName,password:password||user.password,products:products||user.products}
-        users[index] = updated
-        return res.json(updated);
-    }else{
-        return res.json("not founded")
-    }
+    const index = users.indexOf(user)
+
+    
+    const updated = {id,userName:userName||users.userName,password:password||user.password,products:products||user.products}
+    users[index] = updated
+    return res.json(updated);
+    
 })
 
 
 userRouter.delete("/users/:id",(req,res)=>{
-    const id  = parseInt(req.params.id);
+    const {id,user} = req;
 
-    const user = checkingId(id);
-
-    if(user){
-        const index= users.indexOf(user);
-        const deletedUser = users.splice(index,1);
-        return res.json(deletedUser)
-    }else{
-        return res.json("not founded")
-    }
+    
+    const index= users.indexOf(user);
+    const deletedUser = users.splice(index,1);
+    return res.json(deletedUser)
+    
+    
 })
 
 
@@ -96,17 +113,11 @@ export default userRouter
 
 
 function checkingId (id){
-    const result = users.find(value=>value.id === parseInt(id))
+    const result = users.find(value=>value.id === id)
     if(result)
         return result
     else
         return false
 }
 
-
-function findIndex(id){
-    const user = users.find((value)=>value.id===id)
-
-    return users.indexOf(user);
-}
 
