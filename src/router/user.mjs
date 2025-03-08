@@ -1,6 +1,8 @@
 import { Router } from "express";
 import express from "express";
 import { users } from "../utility/constant.mjs";
+import { query,body,param,validationResult } from "express-validator";
+import validateUserRequest from "../validation/user.mjs";
 
 
 const userRouter = Router();
@@ -11,12 +13,9 @@ userRouter.use(express.json())
 
 const parsingId = (req,res,next)=>{
     
-    const id = req.params.id;
-    console.log(id);
+    const id = req.query.id;
     if(id){
-        req.id = parseInt(req.params.id);
-        if(isNaN(req.params.id))
-            return res.json({message:"invalid id input"})
+        req.id = parseInt(req.query.id);
     }
     
     next();
@@ -25,24 +24,31 @@ const parsingId = (req,res,next)=>{
 const validateExistingUserId = (req,res,next)=>{
 
     if(req.method === "POST"){
-        return next();
+        const result = checkingId(req.id)
+        if(result){
+            return res.json("this id exist use another")
+        }else{
+            next()
+        }
     }
-    
-    const id = parseInt(req.params.id);
+
+
+    const {id} = req
     const result = checkingId(id)
     if(result){
         req.user = result;
         next()
     }else{
+        
         return res.json("user with this id not founded")
     }
 }
 
 
+userRouter.use(validateUserRequest);
+userRouter.use("/users/id",parsingId);
+userRouter.use("/users/id",validateExistingUserId);
 
-
-userRouter.use("/users/:id",parsingId);
-userRouter.use("/users/:id",validateExistingUserId);
 
 
 
@@ -60,17 +66,17 @@ userRouter.get("/users",(req,res)=>{
 })
 
 
-userRouter.get("/users/:id",(req,res)=>{
+userRouter.get("/users/id",(req,res)=>{
     const {user} = req;
     return res.json(user)
 })
 
-userRouter.get("/users/:id/products",(req,res)=>{
+userRouter.get("/users/id/products",(req,res)=>{
     const {user} = req
     return res.json(user.products);
 })
 
-userRouter.post("/users/:id/update",(req,res)=>{
+userRouter.post("/users/id/update",(req,res)=>{
     const {userName,password,products} = req.body
     const {id} = req
 
@@ -82,7 +88,7 @@ userRouter.post("/users/:id/update",(req,res)=>{
 })
 
 
-userRouter.patch("/users/:id",(req,res)=>{
+userRouter.patch("/users/id",(req,res)=>{
     const {id,user} = req;
     const {userName,password,products} = req.body
 
@@ -96,7 +102,7 @@ userRouter.patch("/users/:id",(req,res)=>{
 })
 
 
-userRouter.delete("/users/:id",(req,res)=>{
+userRouter.delete("/users/id",(req,res)=>{
     const {id,user} = req;
 
     
