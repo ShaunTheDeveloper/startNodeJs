@@ -43,12 +43,19 @@ userRouter.get("/users/id",
     return res.json(user)
 })
 
-userRouter.get("/users/id/products",(req,res)=>{
+userRouter.get("/users/id/products",checkSchema(validateIdField),checkValidationResult,parsingId,ifIdExist,(req,res)=>{
     const {user} = req
     return res.json(user.products);
 })
 
-userRouter.post("/users/id/update",(req,res)=>{
+userRouter.post("/users/id/update",
+    checkSchema(validateIdField),
+    checkSchema(validateUserNameField),
+    checkSchema(validatePasswordField),
+    checkValidationResult,
+    parsingId,
+    ifIdNotExist,
+    (req,res)=>{
     const {userName,password,products} = req.body
     const {id} = req
 
@@ -60,7 +67,14 @@ userRouter.post("/users/id/update",(req,res)=>{
 })
 
 
-userRouter.patch("/users/id",(req,res)=>{
+userRouter.patch("/users/id",
+    checkSchema(validateIdField),
+    checkSchema(validateUserNameField),
+    checkSchema(validatePasswordField),
+    checkValidationResult,
+    parsingId,
+    ifIdExist,
+    (req,res)=>{
     const {id,user} = req;
     const {userName,password,products} = req.body
 
@@ -74,7 +88,12 @@ userRouter.patch("/users/id",(req,res)=>{
 })
 
 
-userRouter.delete("/users/id",(req,res)=>{
+userRouter.delete("/users/id",
+    checkSchema(validateIdField),
+    checkValidationResult,
+    parsingId,
+    ifIdExist,
+    (req,res)=>{
     const {id,user} = req;
 
     
@@ -90,12 +109,6 @@ userRouter.delete("/users/id",(req,res)=>{
 export default userRouter
 
 
-function checkingId (id){
-    const result = users.find(value=>value.id === id)
-    if(result)
-        return result
-    else
-        return false
-}
+
 
 
